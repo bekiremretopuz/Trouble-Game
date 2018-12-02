@@ -10,44 +10,45 @@ export class Player extends Phaser.Group {
     private _color: any = null; 
     public onPlayerAction: Phaser.Signal = new Phaser.Signal();
 
-    constructor(game: Phaser.Game, x: number, y: number) {
+    constructor(game: Phaser.Game) {
         super(game, null, 'Player', false);
-        this.position.set(x, y); 
         this.init();
-        this.initEvents();
     }
-    
-    private init(): void {
+
+    private init(): void { 
         this._player = this.game.add.sprite(0, 0, 'character', null, this);
         this._player.anchor.set(0.5, 0.5);
         this._player.scale.set(0.25, 0.25);
-        this._player.position.set(640, 360);
+        this._player.position.set(640, 360); 
         this.game.physics.enable(this._player, Phaser.Physics.ARCADE);
-        this._player.body.collideWorldBounds = true;   
-        this._player.body.bounce.set(1);
         this._player.body.immovable = true;
         this.color = this.getRandomColors(); // Create Dynamic Colors
+        this.initEvents(); 
     }  
 
     private initEvents(): void {
         this.game.canvas.addEventListener('mousedown', () => { 
-            this.game.input.mouse.requestPointerLock();
+            this.game.input.mouse.locked = true; 
         });
 
         this.game.canvas.addEventListener('mouseup', () => {
-            this.game.input.mouse.locked = false;
-            this.game.input.mouse.releasePointerLock();
-        });   
-    } 
-    update(): void { 
-        if ( this.game.input.mouse.locked) { 
-            this.game.physics.arcade.moveToPointer(this._player, 500); 
-            if (Phaser.Rectangle.contains(this._player.body, this.game.input.x, this.game.input.y)) 
-                this._player.body.velocity.setTo(0, 0);
-            
-        } else 
-            this._player.body.velocity.setTo(0, 0);
-    } 
+            this.game.input.mouse.locked = false; 
+        });    
+
+        this.game.canvas.addEventListener('mousemove', (e) => {
+            this.onPointerMove(e);
+        });    
+    }    
+
+    private onPointerMove(pointer) {
+        if (this.game.input.mouse.locked) {
+            this._player.x += pointer.movementX;
+            this._player.y += pointer.movementY;
+
+            this._player.x = Phaser.Math.wrap(this._player.x, 0, this.game.renderer.width);
+            this._player.y = Phaser.Math.wrap(this._player.y, 0, this.game.renderer.height);
+        }
+    }  
 
     private getRandomColors(): number {
         let rndColor: number = this.getRandomNumbers(1, 4); // Colors Enum Range
@@ -75,6 +76,7 @@ export class Player extends Phaser.Group {
     private getRandomNumbers(minimun: number, maximum: number) {
         return Math.floor(Math.random() * (maximum - minimun + 1)) + minimun;
     }
+
     // GETTERS AND SETTERS
 
     public get color(): number {

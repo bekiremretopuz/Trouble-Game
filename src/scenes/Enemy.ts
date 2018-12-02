@@ -26,11 +26,11 @@ export class Enemy extends Phaser.Group {
         this.createEnemy();
     }
 
-    private enemyHorizontolAnimation(): void {   
+    private enemyVerticalAnimation(): void {   
         TweenLite.to(this._enemyContainer, 4, {
             y: 720,
-            onComplete: () => {
-                this._enemyContainer.destroy();
+            onComplete: () => { 
+                this.destroy();
                 this.onEnemyAction.dispatch("EnemyCompleteAnimation");
             }
         });
@@ -71,14 +71,12 @@ export class Enemy extends Phaser.Group {
             this._enemy[i] = this.game.add.sprite(0, 0, this._selectionEnemy, null, this._enemyContainer);
             this._enemy[i].scale.set(0.1, 0.1); 
             this._enemy[i].position.setTo(50 + i * 50, 50);   
-            this.game.physics.enable(this._enemy[i], Phaser.Physics.ARCADE);  
-            this._enemy[i].body.collideWorldBounds = true;   
-            this._enemy[i].body.bounce.set(1);
-            this._enemy[i].body.immovable = true;
-        } 
+            this.game.physics.enable(this._enemy[i], Phaser.Physics.ARCADE);     
+            this._enemy[i].body.immovable = true; 
+        }  
 
         this.color = this.getRandomColors(); // Create Dynamic Colors 
-        this.enemyHorizontolAnimation();
+        this.enemyVerticalAnimation();
     }  
 
     private getRandomColors(): number {
@@ -114,19 +112,17 @@ export class Enemy extends Phaser.Group {
         return this._color;
     }
 
-    public set color(value: number) {
+    public set color(value: number) { 
         if (this._color != value) {
             this._color = value; 
             for (let i = 0; i < this._enemyContainer.children.length; i++) {
                 this._enemy[i].tint = value; // Tinting    
-            }
+            } 
             this.onEnemyAction.dispatch("EnemyColor", value);
         }
     }
 
-    public get enemyChildrens(): Phaser.Sprite {
-        for (let i = 0; i < this._enemyContainer.children.length; i++) {
-            return this._enemy[i];    
-        }
+    public get enemyContainer(): Phaser.Group {
+        return this._enemyContainer;
     }
 } 
